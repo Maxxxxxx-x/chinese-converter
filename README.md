@@ -3,9 +3,10 @@
 Converts Simplified Chinese to Hong Kong Traditional Chinese
 
 # To build
+```sh
 make tidy
 make build
-
+```
 
 The binary will be built and placed in ./tmp/
 
