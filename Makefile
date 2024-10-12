@@ -10,9 +10,4 @@ tidy:
 
 .PHONY: build
 build:
-	go build ${main_path} -o=${binary_name}
-
-.PHONY: run
-run: build
-	 ./tmp/${binary_name}
-
+	go build ${main_path} -o ./bin/${binary_name}
