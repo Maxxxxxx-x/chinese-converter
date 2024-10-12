@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/longbridgeapp/opencc"
@@ -15,7 +16,7 @@ func usage() {
 	flag.PrintDefaults()
 }
 
-func readFile(filePath string) (string) {
+func readFile(filePath string) string {
 	body, err := os.ReadFile(filePath)
 	if err != nil {
 		fmt.Printf("Failed to read file: %v\n", err)
@@ -25,41 +26,38 @@ func readFile(filePath string) (string) {
 	return string(body)
 }
 
-func getFileNameAndExtension(filePath string) (string, string) {
-	splitted := strings.Split(filePath, "/")
-	rawFileName := splitted[len(splitted)-1]
-	fileName := strings.Split(rawFileName, ".")[0]
-	fileExt := strings.Split(rawFileName, ".")[len(strings.Split(rawFileName, "."))-1]
-
-	return fileName, fileExt
+func getFileNameAndExtension(pathName string) (string, string) {
+    fileExt := filepath.Ext(pathName)
+    fileName := strings.Split(pathName, fileExt)[0]
+    return fileName, fileExt
 }
 
-func convert(content string) (string) {
-    s2hk, err := opencc.New("s2hk")
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "Failed to start opencc.\nErr: %v", err)
-        os.Exit(1)
-    }
+func convert(content string) string {
+	s2hk, err := opencc.New("s2hk")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to start opencc.\nErr: %v", err)
+		os.Exit(1)
+	}
 
-    output, err := s2hk.Convert(content)
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "Failed to convert text.\nErr: %v\n", err)
-        os.Exit(1)
-    }
+	output, err := s2hk.Convert(content)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to convert text.\nErr: %v\n", err)
+		os.Exit(1)
+	}
 
-    return output
+	return output
 }
 
 func writeToFile(fileName string, content string) {
-    file, err := os.Create(fileName)
-    if err != nil {
-        fmt.Printf("Failed to create file %s. Err: %v\n", fileName, err)
-        os.Exit(1)
-    }
+	file, err := os.Create(fileName)
+	if err != nil {
+		fmt.Printf("Failed to create file %s. Err: %v\n", fileName, err)
+		os.Exit(1)
+	}
 
-    defer file.Close()
+	defer file.Close()
 
-    file.WriteString(content)
+	file.WriteString(content)
 }
 
 func main() {
@@ -82,15 +80,15 @@ func main() {
 		os.Exit(1)
 	}
 
-    fmt.Println("Starting conversion...")
+	fmt.Println("Starting conversion...")
 	fileName, fileExt := getFileNameAndExtension(inputFilePath)
 	if outputFileName == "" {
 		outputFileName = fmt.Sprintf("%s.zh_HK.%s", fileName, fileExt)
 	}
-    fileContent := readFile(inputFilePath)
+	fileContent := readFile(inputFilePath)
 
-    output := convert(fileContent)
-    fmt.Printf("Converted!\nCreating file %s...\n", outputFileName)
-    writeToFile(outputFileName, output)
-    fmt.Println("Done!")
+	output := convert(fileContent)
+	fmt.Printf("Converted!\nCreating file %s...\n", outputFileName)
+	writeToFile(outputFileName, output)
+	fmt.Println("Done!")
 }
