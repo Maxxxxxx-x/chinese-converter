@@ -11,3 +11,4 @@ tidy:
 .PHONY: build
 build:
 	go build -o=./bin/${binary_name} ${main_path}
+	ls
